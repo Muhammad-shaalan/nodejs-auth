@@ -37,17 +37,18 @@ const createUser = asyncWrapper(
 
 
         const hashedPassword = await bcrypt.hash(password, 8)
-        const newUser = new User({name, email, password: hashedPassword});
-        const token = await generateJWT({user: newUser.email, id: newUser._id});
+        const data = new User({
+            name, 
+            email, 
+            password: hashedPassword,
+            avatar: req.file.filename
+            
+        });
+        const token = await generateJWT({user: data.email, id: data._id});
+        data.token = token
+        await data.save();
 
-
-        await newUser.save()
-        const newUserResponse = {
-            name: newUser.name,
-            email: newUser.email,
-            token
-        };
-        return res.status(201).json({status: httpStatusText.SUCCESS, statusCode: 201, data: {newUserResponse}})
+        return res.status(201).json({status: httpStatusText.SUCCESS, statusCode: 201, data})
     }
 )
 
@@ -76,7 +77,7 @@ const login = asyncWrapper(
                 email: user.email,
                 token
             };
-            return res.status(201).json({status: httpStatusText.SUCCESS, statusCode: 201, data: {userResponse}})
+            return res.status(201).json({status: httpStatusText.SUCCESS, statusCode: 201, data: {...userResponse}})
         } else {
             const error = AppError.create("email or password is wrong", 400, httpStatusText.FAIL);
             next(error);

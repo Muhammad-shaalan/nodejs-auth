@@ -1,6 +1,7 @@
 const express = require("express");
 const app = express();
 require("dotenv").config();
+const path = require("path")
 const port = process.env.PORT || 4000;
 app.listen(port, () => {
     console.log(`App listening on port ${port}`)
@@ -15,6 +16,7 @@ mongoose.connect(process.env.MONGO_URL).then(() => {
     console.log("DB Connected");
 })
 
+app.use("/media", express.static(path.join(__dirname, 'media')));
 
 const usersRoutes = require("./routes/users.routes");
 app.use("/api/users", usersRoutes);
